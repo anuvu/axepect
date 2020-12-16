@@ -5,8 +5,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/anuvu/axepect/cimc"
 	"github.com/anuvu/axepect/loginshell"
+	"github.com/anuvu/axepect/pkg/cimc"
 	"github.com/apex/log"
 	"github.com/urfave/cli/v2"
 )
