@@ -15,7 +15,7 @@ build: .build $(CMDS)
 	go build ./...
 	@touch $@
 
-cimc/cmd/demo: $(wildcard cimc/cmd/*.go) $(GO_FILES)
+cimc/cmd/demo: $(wildcard cimc/cmd/*.go) $(ALL_GO_FILES)
 	cd $(dir $@) && go build -o $(notdir $@) $(BUILD_FLAGS) ./...
 
 gofmt: .gofmt
