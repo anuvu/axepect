@@ -4,7 +4,7 @@ VERSION_FULL := $(VERSION)$(VERSION_SUFFIX)
 LDFLAGS := "${ldflags:+$ldflags }-X main.version=${ver}${suff}"
 BUILD_FLAGS := -ldflags "-X main.version=$(VERSION_FULL)"
 
-CMDS := cimc/cmd/demo
+CMDS := cmd/cimc/demo
 
 GO_FILES := $(wildcard *.go)
 ALL_GO_FILES := $(wildcard *.go */*.go)
@@ -15,7 +15,7 @@ build: .build $(CMDS)
 	go build ./...
 	@touch $@
 
-cimc/cmd/demo: $(wildcard cimc/cmd/*.go) $(ALL_GO_FILES)
+cmd/cimc/demo: $(wildcard cmd/cimc/*.go) $(ALL_GO_FILES)
 	cd $(dir $@) && go build -o $(notdir $@) $(BUILD_FLAGS) ./...
 
 gofmt: .gofmt
