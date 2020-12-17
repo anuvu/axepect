@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/anuvu/axepect"
+	axepect "github.com/anuvu/axepect/pkg/expect"
 	"github.com/apex/log"
 	goexpect "github.com/google/goexpect"
 	"github.com/pkg/errors"

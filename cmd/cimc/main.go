@@ -1,12 +1,13 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"strings"
 
-	"github.com/anuvu/axepect/loginshell"
 	"github.com/anuvu/axepect/pkg/cimc"
+	"github.com/anuvu/axepect/pkg/loginshell"
 	"github.com/apex/log"
 	"github.com/urfave/cli/v2"
 )
@@ -60,7 +61,9 @@ func demoMain(c *cli.Context) error {
 
 	fmt.Printf("Connected to cimc %s\n", cs)
 
-	if pstate, err := cs.GetPowerState(); err != nil {
+	ctx := context.TODO()
+
+	if pstate, err := cs.GetPowerState(ctx); err != nil {
 		log.Fatalf("failed to read power state: %v\n", err)
 	} else {
 		fmt.Printf("system is powered %s\n", pstate)
@@ -68,7 +71,7 @@ func demoMain(c *cli.Context) error {
 
 	for _, cmd := range []string{"/show sol", "/show http", "/bios/show"} {
 		fmt.Printf("> %s\n", cmd)
-		ret, err := cs.SendCmd(cmd)
+		ret, err := cs.SendCmd(ctx, cmd)
 		if err != nil {
 			log.Fatalf("Failed: %v\n", err)
 		}
@@ -80,7 +83,7 @@ func demoMain(c *cli.Context) error {
 		loginUser := toks[0]
 		loginPass := toks[1]
 
-		exp, err := cs.ExpectHostConsole()
+		exp, err := cs.OpenConsole(ctx)
 		if err != nil {
 			log.Fatalf("error: %v", err)
 		}
@@ -102,13 +105,13 @@ func demoMain(c *cli.Context) error {
 			log.Fatalf("Failed to logout: %v\n", err)
 		}
 
-		if err := cs.EndHostConsole(); err != nil {
+		if err := cs.CloseConsole(ctx); err != nil {
 			log.Fatalf("Failed to exit host console\n")
 		}
 
 	}
 
-	if err := cs.Close(); err != nil {
+	if err := cs.Close(ctx); err != nil {
 		log.Fatalf("Failed to close session: %v\n", err)
 	}
 
