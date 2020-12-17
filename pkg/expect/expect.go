@@ -1,4 +1,4 @@
-package axepect
+package expect
 
 import (
 	"fmt"

@@ -1,13 +1,14 @@
 package cimc
 
 import (
+	"context"
 	"fmt"
 	"strings"
 )
 
 // GetPowerState - return power state of system.
-func (cs *Session) GetPowerState() (PowerState, error) {
-	resp, err := cs.SendCmd("/chassis/show detail")
+func (cs *Session) GetPowerState(ctx context.Context) (PowerState, error) {
+	resp, err := cs.SendCmd(ctx, "/chassis/show detail")
 	if err != nil {
 		return Unknown, err
 	}
@@ -25,22 +26,22 @@ func (cs *Session) GetPowerState() (PowerState, error) {
 }
 
 // PowerOff - Turn power off, if on
-func (cs *Session) PowerOff() error {
-	return powerCmd(cs, "off")
+func (cs *Session) PowerOff(ctx context.Context) error {
+	return powerCmd(ctx, cs, "off")
 }
 
 // PowerOn - Turn power off, if off
-func (cs *Session) PowerOn() error {
-	return powerCmd(cs, "on")
+func (cs *Session) PowerOn(ctx context.Context) error {
+	return powerCmd(ctx, cs, "on")
 }
 
 // PowerCycle - Turn power off, if off and then back on.
-func (cs *Session) PowerCycle() error {
-	return powerCmd(cs, "cycle")
+func (cs *Session) PowerCycle(ctx context.Context) error {
+	return powerCmd(ctx, cs, "cycle")
 }
 
-func powerCmd(cs *Session, cmd string) error {
-	_, err := cs.SendCmd("/chassis/power " + cmd)
+func powerCmd(ctx context.Context, cs *Session, cmd string) error {
+	_, err := cs.SendCmd(ctx, "/chassis/power "+cmd)
 	// TODO: should look at the response
 	return err
 }

@@ -1,6 +1,7 @@
 package cimc
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"strings"
@@ -27,8 +28,8 @@ type Session struct {
 
 // NewSession - return a Session, logging in with password and user@addr
 //   For example NewSession("10.0.0.1", "admin", "password")
-func NewSession(addr, user, pass string) (Session, error) {
-	sess := Session{}
+func NewSession(addr, user, pass string) (CIMCSession, error) {
+	sess := &Session{}
 	fmt.Printf("Connecting to %s@%s\n", user, addr)
 	sshClt, err := ssh.Dial("tcp", addr, &ssh.ClientConfig{
 		User:            user,
@@ -81,7 +82,7 @@ func (cs Session) String() string {
 }
 
 // Close - close the ssh session.
-func (cs *Session) Close() error {
+func (cs *Session) Close(ctx context.Context) error {
 	if err := cs.exp.Close(); err != nil {
 		return err
 	}
@@ -93,7 +94,7 @@ func (cs *Session) Close() error {
 }
 
 // SendCmd - send a command to the cimc command line interface.  Return its response.
-func (cs *Session) SendCmd(msg string) (string, error) {
+func (cs *Session) SendCmd(ctx context.Context, msg string) (string, error) {
 	fields := strings.Fields(msg)
 	if strings.HasPrefix(msg, "/") {
 		toks := strings.Split(fields[0], "/")
@@ -102,12 +103,12 @@ func (cs *Session) SendCmd(msg string) (string, error) {
 		cmd := toks[len(toks)-1]
 		scope := strings.Join(toks[1:len(toks)-1], "/")
 
-		_, err := cs.SendCmd("top")
+		_, err := cs.SendCmd(ctx, "top")
 		if err != nil {
 			return "", err
 		}
 
-		_, err = cs.SendCmd("scope " + scope)
+		_, err = cs.SendCmd(ctx, "scope "+scope)
 		if err != nil {
 			return "", err
 		}
@@ -159,9 +160,9 @@ func (cs *Session) SendCmd(msg string) (string, error) {
 	return response + "\n", nil
 }
 
-// ExpectHostConsole - return a expect.GExpect that is hooked up to the host's console.
+// OpenConsole - return a expect.GExpect that is hooked up to the host's console.
 // as you would get if you typed 'connect host'
-func (cs *Session) ExpectHostConsole() (*goexpect.GExpect, error) {
+func (cs *Session) OpenConsole(ctx context.Context) (*goexpect.GExpect, error) {
 	exp := cs.exp
 	if err := exp.Send("connect host\n"); err != nil {
 		return nil, err
@@ -174,9 +175,9 @@ func (cs *Session) ExpectHostConsole() (*goexpect.GExpect, error) {
 	return exp, err
 }
 
-// EndHostConsole - exit from the host console, back to the cimc shell.
-func (cs *Session) EndHostConsole() error {
-	if _, err := cs.SendCmd(ctrlX); err != nil {
+// CloseConsole - exit from the host console, back to the cimc shell.
+func (cs *Session) CloseConsole(ctx context.Context) error {
+	if _, err := cs.SendCmd(ctx, ctrlX); err != nil {
 		return err
 	}
 	return nil
