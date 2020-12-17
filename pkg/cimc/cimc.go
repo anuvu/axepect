@@ -74,7 +74,7 @@ func NewSession(addr, user, pass string) (CIMCSession, error) {
 
 	sess.desc = fmt.Sprintf("%s@%s [%s]", user, addr, subs[1])
 	sess.promptRe = regexp.MustCompile(
-		`(` + regexp.QuoteMeta(subs[1]) + `)([ ](/[^ ]*)[ ]){0,1}(#) `)
+		`(` + regexp.QuoteMeta(subs[1]) + `)([ ](/[^ ]*)[ ]){0,1}([*]*)(#) `)
 
 	return sess, nil
 }
