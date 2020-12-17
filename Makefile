@@ -6,12 +6,11 @@ BUILD_FLAGS := -ldflags "-X main.version=$(VERSION_FULL)"
 
 CMDS := cmd/cimc/demo
 
-GO_FILES := $(wildcard *.go)
-ALL_GO_FILES := $(wildcard *.go */*.go)
+ALL_GO_FILES := $(shell find * -name "*.go" -not -path "/vendor" -type f)
 
 build: .build $(CMDS)
 
-.build: $(GO_FILES)
+.build: $(ALL_GO_FILES)
 	go build ./...
 	@touch $@
 
