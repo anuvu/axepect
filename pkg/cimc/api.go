@@ -2,6 +2,7 @@ package cimc
 
 import (
 	"context"
+
 	goexpect "github.com/google/goexpect"
 )
 
@@ -34,4 +35,10 @@ type CIMCSession interface {
 	SendCmd(context.Context, string) (string, error)
 	// Close closes the session
 	Close(context.Context) error
+	// RedfishEnable turns on Redfish
+	RedfishEnable(context.Context) error
+	// RedfishEnable turns off Redfish
+	RedfishDisable(context.Context) error
+	// RedfishEnable returns info on state of Redfish
+	RedfishInfo(context.Context) (bool, int, int, error)
 }

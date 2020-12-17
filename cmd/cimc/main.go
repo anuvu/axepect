@@ -69,6 +69,12 @@ func demoMain(c *cli.Context) error {
 		fmt.Printf("system is powered %s\n", pstate)
 	}
 
+	if rfish, active, max, err := cs.RedfishInfo(ctx); err != nil {
+		log.Fatalf("bad news: %v", err)
+	} else {
+		fmt.Printf("Redfish enabled=%t active=%d max=%d\n", rfish, active, max)
+	}
+
 	for _, cmd := range []string{"/show sol", "/show http", "/bios/show"} {
 		fmt.Printf("> %s\n", cmd)
 		ret, err := cs.SendCmd(ctx, cmd)
