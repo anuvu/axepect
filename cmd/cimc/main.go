@@ -60,7 +60,13 @@ func demoMain(c *cli.Context) error {
 
 	fmt.Printf("Connected to cimc %s\n", cs)
 
-	for _, cmd := range []string{"show sol", "show http", "/bios/show"} {
+	if pstate, err := cs.GetPowerState(); err != nil {
+		log.Fatalf("failed to read power state: %v\n", err)
+	} else {
+		fmt.Printf("system is powered %s\n", pstate)
+	}
+
+	for _, cmd := range []string{"/show sol", "/show http", "/bios/show"} {
 		fmt.Printf("> %s\n", cmd)
 		ret, err := cs.SendCmd(cmd)
 		if err != nil {
@@ -100,12 +106,6 @@ func demoMain(c *cli.Context) error {
 			log.Fatalf("Failed to exit host console\n")
 		}
 
-	}
-
-	if out, err := cs.SendCmd("/show version"); err != nil {
-		log.Fatalf("Failed to show version: %v", err)
-	} else {
-		fmt.Printf("Version seems to be:%s\n", out)
 	}
 
 	if err := cs.Close(); err != nil {

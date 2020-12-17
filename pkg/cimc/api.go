@@ -10,6 +10,10 @@ const (
 	On
 )
 
+func (p PowerState) String() string {
+	return []string{"Unknown", "Off", "On"}[p]
+}
+
 type CIMCSession interface {
 	PowerOn(context.Context) error
 	PowerOff(context.Context) error
