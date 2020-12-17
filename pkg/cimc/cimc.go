@@ -18,6 +18,8 @@ const (
 	ctrlM   = "\x0D"
 )
 
+var noMoreCmds = []string{"commit", "top", "scope", "set"}
+
 // Session - object holding info for the cimc session.
 type Session struct {
 	sshClient *ssh.Client
@@ -121,8 +123,15 @@ func (cs *Session) SendCmd(ctx context.Context, msg string) (string, error) {
 
 	send := msg + " | no-more"
 	// do not add 'no-more' to top, scope, or any command with a |
-	if fields[0] == "top" || fields[0] == "scope" || strings.ContainsAny(msg, "|") {
+	if strings.ContainsAny(msg, "|") {
 		send = msg
+	} else {
+		for _, n := range noMoreCmds {
+			if fields[0] == n {
+				send = msg
+				break
+			}
+		}
 	}
 
 	if err := cs.exp.Send(send + "\n"); err != nil {
