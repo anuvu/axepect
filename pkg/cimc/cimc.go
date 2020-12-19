@@ -3,6 +3,7 @@ package cimc
 import (
 	"context"
 	"fmt"
+	"os"
 	"regexp"
 	"strings"
 	"time"
@@ -54,7 +55,7 @@ func NewSession(addr, user, pass string) (CIMCSession, error) {
 
 	opts := []goexpect.Option{}
 	// To debug, just add options
-	// opts = []goexpect.Option{goexpect.Verbose(true), goexpect.VerboseWriter(os.Stderr)}
+	opts = []goexpect.Option{goexpect.Verbose(true), goexpect.VerboseWriter(os.Stderr)}
 	e, _, err := goexpect.SpawnSSHPTY(sshClt, timeout, tios, opts...)
 	if err != nil {
 		return sess, err
