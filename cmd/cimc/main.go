@@ -9,6 +9,7 @@ import (
 	"github.com/anuvu/axepect/pkg/cimc"
 	"github.com/anuvu/axepect/pkg/loginshell"
 	"github.com/apex/log"
+	goexpect "github.com/google/goexpect"
 	"github.com/urfave/cli/v2"
 )
 
@@ -28,6 +29,11 @@ func main() {
 					&cli.StringFlag{
 						Name:  "serial-login",
 						Usage: "Attempt serial login over SOL with user:pass",
+					},
+					&cli.BoolFlag{
+						Name:  "debug",
+						Usage: "enable debug output",
+						Value: false,
 					},
 				},
 			},
@@ -54,7 +60,12 @@ func demoMain(c *cli.Context) error {
 
 	loginCreds := c.String("serial-login")
 
-	cs, err := cimc.NewSession(host+":22", user, pass)
+	opts := []goexpect.Option{}
+	if c.Bool("debug") {
+		opts = append(opts, goexpect.Verbose(true), goexpect.VerboseWriter(os.Stderr))
+	}
+
+	cs, err := cimc.NewSessionOpts(host+":22", user, pass, opts)
 	if err != nil {
 		log.Fatalf("failed new session: %v", err)
 	}

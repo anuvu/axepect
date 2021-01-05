@@ -3,7 +3,6 @@ package cimc
 import (
 	"context"
 	"fmt"
-	"os"
 	"regexp"
 	"strings"
 	"time"
@@ -32,6 +31,14 @@ type Session struct {
 // NewSession - return a Session, logging in with password and user@addr
 //   For example NewSession("10.0.0.1", "admin", "password")
 func NewSession(addr, user, pass string) (CIMCSession, error) {
+	return NewSessionOpts(addr, user, pass, []goexpect.Option{})
+}
+
+// NewSessionOpts - return a Session, with provided goexpect.Option list
+//   For example to enable debug:
+//     NewSessionOpts("10.0.0.1", "admin", "password",
+//        []goexpect.Option{goexpect.Verbose(true), goexpect.VerboseWriter(os.Stderr)})
+func NewSessionOpts(addr, user, pass string, opts []goexpect.Option) (CIMCSession, error) {
 	sess := &Session{}
 	fmt.Printf("Connecting to %s@%s\n", user, addr)
 	sshClt, err := ssh.Dial("tcp", addr, &ssh.ClientConfig{
@@ -55,9 +62,6 @@ func NewSession(addr, user, pass string) (CIMCSession, error) {
 	tios.Wz.WsCol, tios.Wz.WsRow = 0, 32768
 	tios.Lflag |= term.ECHO
 
-	opts := []goexpect.Option{}
-	// To debug, just add options
-	opts = []goexpect.Option{goexpect.Verbose(true), goexpect.VerboseWriter(os.Stderr)}
 	e, _, err := goexpect.SpawnSSHPTY(sshClt, timeout, tios, opts...)
 	if err != nil {
 		return sess, err

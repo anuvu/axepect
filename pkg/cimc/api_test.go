@@ -8,6 +8,7 @@ import (
 
 	"github.com/anuvu/axepect/pkg/cimc"
 	"github.com/anuvu/axepect/pkg/test"
+	goexpect "github.com/google/goexpect"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
@@ -27,7 +28,9 @@ func TestAPIs(t *testing.T) {
 	addr := fmt.Sprintf("127.0.0.1:%d", port)
 	ctx := context.TODO()
 	Convey("Given a CIMC session", t, func() {
-		sess, err := cimc.NewSession(addr, "test", "test123")
+		sess, err := cimc.NewSessionOpts(addr, "test", "test123",
+			[]goexpect.Option{goexpect.Verbose(true), goexpect.VerboseWriter(os.Stderr)})
+
 		So(sess, ShouldNotBeNil)
 		So(err, ShouldBeNil)
 		Convey("GetPowerState()", func() {
