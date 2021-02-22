@@ -132,7 +132,7 @@ func (cs *Session) SendCmd(ctx context.Context, msg string) (string, error) {
 		send = msg
 	} else {
 		for _, n := range noMoreCmds {
-			if fields[0] == n {
+			if strings.Contains(fields[0], n) {
 				send = msg
 				break
 			}
@@ -141,6 +141,18 @@ func (cs *Session) SendCmd(ctx context.Context, msg string) (string, error) {
 
 	if err := cs.exp.Send(send + "\n"); err != nil {
 		return "", err
+	}
+
+	// if 'power' cmd, a confirmation is needed
+	if strings.Contains(send, "power") {
+		confirmRe := regexp.MustCompile(`.*\[y\|N\]`)
+		_, _, err := cs.exp.Expect(confirmRe, timeout)
+		if err != nil {
+			return "", err
+		}
+		if err := cs.exp.Send("y\n"); err != nil {
+			return "", err
+		}
 	}
 
 	// data has
