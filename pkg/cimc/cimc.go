@@ -19,7 +19,7 @@ const (
 	ctrlM   = "\x0D"
 )
 
-var noMoreCmds = []string{"commit", "top", "scope", "set"}
+var noMoreCmds = []string{"commit", "top", "scope", "set", "power"}
 
 // Session - object holding info for the cimc session.
 type Session struct {
