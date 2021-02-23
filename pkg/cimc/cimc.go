@@ -104,11 +104,12 @@ func (cs *Session) Close(ctx context.Context) error {
 // SendCmd - send a command to the cimc command line interface.  Return its response.
 func (cs *Session) SendCmd(ctx context.Context, msg string) (string, error) {
 	fields := strings.Fields(msg)
+	cmd := fields[0]
 	if strings.HasPrefix(msg, "/") {
 		toks := strings.Split(fields[0], "/")
 
 		// support SendCmd("/bios/memory/show detail")
-		cmd := toks[len(toks)-1]
+		cmd = toks[len(toks)-1]
 		scope := strings.Join(toks[1:len(toks)-1], "/")
 
 		_, err := cs.SendCmd(ctx, "top")
@@ -133,7 +134,7 @@ func (cs *Session) SendCmd(ctx context.Context, msg string) (string, error) {
 		send = msg
 	} else {
 		for _, n := range noMoreCmds {
-			if fields[0] == n {
+			if cmd == n {
 				send = msg
 				break
 			}
