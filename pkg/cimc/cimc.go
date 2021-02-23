@@ -2,6 +2,7 @@ package cimc
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"regexp"
 	"strings"
@@ -170,6 +171,12 @@ func (cs *Session) SendCmd(ctx context.Context, msg string) (string, error) {
 		dataLines = append(dataLines, line)
 	}
 	response := strings.Join(dataLines, "\n")
+	if len(dataLines) > 0 {
+		lastLine := dataLines[len(dataLines)-1]
+		if strings.HasPrefix("Error:", lastLine) {
+			return response + "\n", errors.New(lastLine)
+		}
+	}
 
 	return response + "\n", nil
 }
