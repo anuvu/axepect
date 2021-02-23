@@ -21,12 +21,17 @@ const (
 
 var noMoreCmds = []string{"commit", "top", "scope", "set", "power"}
 
+// match the 'confirm' prompt with either y or n as default ([y|N] or [Y|n])
+var confirmReStr = regexp.QuoteMeta("Do you want to continue?[") + "([yY]\\|[nN])" + regexp.QuoteMeta("]")
+var confirmRe = regexp.MustCompile(confirmReStr)
+
 // Session - object holding info for the cimc session.
 type Session struct {
-	sshClient *ssh.Client
-	exp       *goexpect.GExpect
-	desc      string
-	promptRe  *regexp.Regexp
+	sshClient         *ssh.Client
+	exp               *goexpect.GExpect
+	desc              string
+	promptRe          *regexp.Regexp
+	promptOrConfirmRe *regexp.Regexp
 }
 
 // NewSession - return a Session, logging in with password and user@addr
@@ -79,9 +84,9 @@ func NewSessionOpts(addr, user, pass string, opts []goexpect.Option) (CIMCSessio
 	_, subs, err := e.Expect(promptRe, timeout)
 
 	sess.desc = fmt.Sprintf("%s@%s [%s]", user, addr, subs[1])
-	sess.promptRe = regexp.MustCompile(
-		`(` + regexp.QuoteMeta(subs[1]) + `)([ ](/[^ ]*)[ ]){0,1}([*]*)(#) `)
-
+	promptReStr := `(` + regexp.QuoteMeta(subs[1]) + `)([ ](/[^ ]*)[ ]){0,1}([*]*)(#) `
+	sess.promptRe = regexp.MustCompile(promptReStr)
+	sess.promptOrConfirmRe = regexp.MustCompile(promptReStr + "|" + confirmReStr)
 	return sess, nil
 }
 
@@ -149,9 +154,20 @@ func (cs *Session) SendCmd(ctx context.Context, msg string) (string, error) {
 	//  * the command we sent (due to ECHO)
 	//  * multi line response
 	//  * prompt line
-	data, _, err := cs.exp.Expect(cs.promptRe, timeout)
+	data, _, err := cs.exp.Expect(cs.promptOrConfirmRe, timeout)
 	if err != nil {
 		return "", err
+	}
+	if confirmRe.MatchString(data) {
+		// Confirm prompt
+		if err := cs.exp.Send("y\n"); err != nil {
+			return "", fmt.Errorf("failed to send 'y' to a confirm response: %s", err)
+		}
+		afterConfirm, _, err := cs.exp.Expect(cs.promptRe, timeout)
+		if err != nil {
+			return "", fmt.Errorf("error after confirming operation: %s", err)
+		}
+		data += afterConfirm
 	}
 
 	fulldata := strings.Replace(data, ctrlM, "", -1)
