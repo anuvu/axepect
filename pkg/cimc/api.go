@@ -23,7 +23,7 @@ type CIMCSession interface {
 	PowerOn(context.Context) error
 	// PowerOff powers off the connected host
 	PowerOff(context.Context) error
-	// PowerCycle powers off and then on the connected host
+	// PowerCycle powers off (if on) and then on the connected host
 	PowerCycle(context.Context) error
 	// GetPowerState gets the power state of the connected host
 	GetPowerState(context.Context) (PowerState, error)
