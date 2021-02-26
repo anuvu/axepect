@@ -37,7 +37,16 @@ func (cs *Session) PowerOn(ctx context.Context) error {
 
 // PowerCycle - Turn power off, if off and then back on.
 func (cs *Session) PowerCycle(ctx context.Context) error {
-	return powerCmd(ctx, cs, "cycle")
+	curState, err := cs.GetPowerState(ctx)
+	if err != nil {
+		return err
+	}
+	operation := "cycle"
+	if curState == Off {
+		// system was off, turn it on.
+		operation = "on"
+	}
+	return powerCmd(ctx, cs, operation)
 }
 
 func powerCmd(ctx context.Context, cs *Session, cmd string) error {
