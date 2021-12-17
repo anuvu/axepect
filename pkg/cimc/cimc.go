@@ -82,6 +82,9 @@ func NewSessionOpts(addr, user, pass string, opts []goexpect.Option) (CIMCSessio
 	//    <serial>#
 	promptRe := regexp.MustCompile(`([-0-9a-zA-Z]*)# `)
 	_, subs, err := e.Expect(promptRe, timeout)
+	if err != nil {
+		return sess, err
+	}
 
 	sess.desc = fmt.Sprintf("%s@%s [%s]", user, addr, subs[1])
 	promptReStr := `(` + regexp.QuoteMeta(subs[1]) + `)([ ](/[^ ]*)[ ]){0,1}([*]*)(#) `
